@@ -11,10 +11,12 @@ const getCards = (async (req, res) => {
 
 const createCard = (async (req, res) => {
   try {
-    const newCard = await new Card(req.body);
+    const { name, link } = req.body;
+    const newCard = await new Card({ name, link, owner: req.owner._id });
     res.status(201).send(await newCard.save());
   } catch (err) {
     if (err.name === 'ValidationError') {
+      console.log(err.message);
       res.status(400).send({ message: 'Ошибка валидации' });
     } else {
       res.status(500).send({ message: 'Ошибка сервера' });
