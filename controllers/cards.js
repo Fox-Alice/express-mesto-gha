@@ -16,7 +16,6 @@ const createCard = (async (req, res) => {
     res.status(201).send(await newCard.save());
   } catch (err) {
     if (err.name === 'ValidationError') {
-      console.log(err.message);
       res.status(400).send({ message: 'Ошибка валидации' });
     } else {
       res.status(500).send({ message: 'Ошибка сервера' });
