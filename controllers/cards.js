@@ -4,7 +4,7 @@ const getCards = (async (req, res) => {
   try {
     const cards = await Card.find({});
     res.status(200).send(cards);
-  } catch {
+  } catch (err) {
     res.status(500).send({ message: 'Ошибка сервера' });
   }
 });

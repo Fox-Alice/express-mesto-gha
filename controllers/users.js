@@ -4,7 +4,7 @@ const getUsers = (async (req, res) => {
   try {
     const users = await User.find({});
     res.status(200).send(users);
-  } catch {
+  } catch (err) {
     res.status(500).send({ message: 'Ошибка сервера' });
   }
 });
