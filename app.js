@@ -19,6 +19,10 @@ app.use((req, res, next) => {
 
 app.use('/', router);
 
+app.use('/*', (req, res) => {
+  res.send('Страница не найдена', 404);
+});
+
 async function connectDB() {
   await mongoose.connect('mongodb://localhost:27017/mestodb', {
     useNewUrlParser: true,
