@@ -23,8 +23,6 @@ async function connectDB() {
   await mongoose.connect('mongodb://localhost:27017/mestodb', {
     useNewUrlParser: true,
   });
-  console.log('connected to db');
   app.listen(PORT);
-  console.log(`App listening on port ${PORT}`);
 }
 connectDB();
