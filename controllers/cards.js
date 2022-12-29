@@ -1,11 +1,17 @@
 const Card = require('../models/Card');
 
+const {
+  BAD_REQUEST_ERR,
+  NOT_FOUND_ERR,
+  INTERNAL_SERVER_ERR,
+} = require('../constants');
+
 const getCards = (async (req, res) => {
   try {
     const cards = await Card.find({});
     res.status(200).send(cards);
   } catch (err) {
-    res.status(500).send({ message: 'Ошибка сервера' });
+    res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
   }
 });
 
@@ -13,12 +19,16 @@ const createCard = (async (req, res) => {
   try {
     const { name, link } = req.body;
     const newCard = await new Card({ name, link, owner: req.owner._id });
+    Card.populate(newCard, {
+      path: 'user',
+      select: 'name about avatar',
+    });
     res.status(201).send(await newCard.save());
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(400).send({ message: 'Ошибка валидации' });
+      res.status(BAD_REQUEST_ERR).send({ message: 'Ошибка валидации' });
     } else {
-      res.status(500).send({ message: 'Ошибка сервера' });
+      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
 });
@@ -35,11 +45,11 @@ const deleteCard = (async (req, res) => {
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Невалидный id карточки' });
+      res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id карточки' });
     } else if (err.message === 'not found') {
-      res.status(404).send({ message: 'Карточка не найдена' });
+      res.status(NOT_FOUND_ERR).send({ message: 'Карточка не найдена' });
     } else {
-      res.status(500).send({ message: 'Ошибка сервера' });
+      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
 });
@@ -58,11 +68,11 @@ const likeCard = (async (req, res) => {
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Невалидный id карточки' });
+      res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id карточки' });
     } else if (err.message === 'not found') {
-      res.status(404).send({ message: 'Карточка не найдена' });
+      res.status(NOT_FOUND_ERR).send({ message: 'Карточка не найдена' });
     } else {
-      res.status(500).send({ message: 'Ошибка сервера' });
+      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
 });
@@ -81,11 +91,11 @@ const deleteLikeCard = (async (req, res) => {
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Невалидный id карточки' });
+      res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id карточки' });
     } else if (err.message === 'not found') {
-      res.status(404).send({ message: 'Карточка не найдена' });
+      res.status(NOT_FOUND_ERR).send({ message: 'Карточка не найдена' });
     } else {
-      res.status(500).send({ message: 'Ошибка сервера' });
+      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
 });

@@ -1,11 +1,17 @@
 const User = require('../models/User');
 
+const {
+  BAD_REQUEST_ERR,
+  NOT_FOUND_ERR,
+  INTERNAL_SERVER_ERR,
+} = require('../constants');
+
 const getUsers = (async (req, res) => {
   try {
     const users = await User.find({});
     res.status(200).send(users);
   } catch (err) {
-    res.status(500).send({ message: 'Ошибка сервера' });
+    res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
   }
 });
 
@@ -20,11 +26,11 @@ const getUserById = (async (req, res) => {
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Невалидный id' });
+      res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id' });
     } else if (err.message === 'not found') {
-      res.status(404).send({ message: 'Пользователь не найден' });
+      res.status(NOT_FOUND_ERR).send({ message: 'Пользователь не найден' });
     } else {
-      res.status(500).send({ message: 'Ошибка сервера' });
+      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
 });
@@ -35,9 +41,9 @@ const createUser = (async (req, res) => {
     res.status(201).send(await newUser.save());
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(400).send({ message: 'Ошибка валидации' });
+      res.status(BAD_REQUEST_ERR).send({ message: 'Ошибка валидации' });
     } else {
-      res.status(500).send({ message: 'Ошибка сервера' });
+      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
 });
@@ -55,11 +61,11 @@ const updateProfile = (async (req, res) => {
     }
   } catch (err) {
     if (err.message === 'empty field') {
-      res.status(400).send({ message: 'Поле не должно быть пустым' });
+      res.status(BAD_REQUEST_ERR).send({ message: 'Поле не должно быть пустым' });
     } else if (err.message === 'not found') {
-      res.status(404).send({ message: 'Пользователь не найден' });
+      res.status(NOT_FOUND_ERR).send({ message: 'Пользователь не найден' });
     } else {
-      res.status(500).send({ message: 'Ошибка сервера' });
+      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
 });
@@ -77,11 +83,11 @@ const updateAvatar = (async (req, res) => {
     }
   } catch (err) {
     if (err.message === 'empty field') {
-      res.status(400).send({ message: 'Поле не должно быть пустым' });
+      res.status(BAD_REQUEST_ERR).send({ message: 'Поле не должно быть пустым' });
     } else if (err.message === 'not found') {
-      res.status(404).send({ message: 'Пользователь не найден' });
+      res.status(NOT_FOUND_ERR).send({ message: 'Пользователь не найден' });
     } else {
-      res.status(500).send({ message: 'Ошибка сервера' });
+      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
 });
