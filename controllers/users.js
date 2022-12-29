@@ -52,7 +52,7 @@ const createUser = (async (req, res) => {
 
 const updateProfile = (async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.owner._id, req.body);
+    const user = await User.findByIdAndUpdate(req.owner._id, req.body, { new: true });
     if (!req.body.name || !req.body.about) {
       throw new Error('empty field');
     } else if (!user) {
@@ -66,7 +66,6 @@ const updateProfile = (async (req, res) => {
     } else if (err.message === 'not found') {
       res.status(NOT_FOUND_ERR).send({ message: 'Пользователь не найден' });
     } else {
-      console.log(err.message);
       res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
@@ -74,9 +73,8 @@ const updateProfile = (async (req, res) => {
 
 const updateAvatar = (async (req, res) => {
   try {
-    const { avatar } = req.body;
-    const user = await User.findByIdAndUpdate(req.owner._id, { avatar }, { new: true });
-    if (!avatar) {
+    const user = await User.findByIdAndUpdate(req.owner._id, req.body, { new: true });
+    if (!req.body.avatar) {
       throw new Error('empty field');
     } else if (!user) {
       throw new Error('not found');
