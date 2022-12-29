@@ -52,9 +52,8 @@ const createUser = (async (req, res) => {
 
 const updateProfile = (async (req, res) => {
   try {
-    const { name, about } = req.body;
-    const user = await User.findByIdAndUpdate(req.owner._id, { name, about }, { new: true });
-    if (!name || !about) {
+    const user = await User.findByIdAndUpdate(req.owner._id, req.body);
+    if (!req.body.name || !req.body.about) {
       throw new Error('empty field');
     } else if (!user) {
       throw new Error('not found');
@@ -67,6 +66,7 @@ const updateProfile = (async (req, res) => {
     } else if (err.message === 'not found') {
       res.status(NOT_FOUND_ERR).send({ message: 'Пользователь не найден' });
     } else {
+      console.log(err.message);
       res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
     }
   }
