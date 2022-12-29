@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const Card = require('../models/Card');
 
 const {
@@ -25,7 +27,7 @@ const createCard = (async (req, res) => {
     });
     res.status(201).send(await newCard.save());
   } catch (err) {
-    if (err.name === 'ValidationError') {
+    if (err instanceof mongoose.Error.ValidationError) {
       res.status(BAD_REQUEST_ERR).send({ message: 'Ошибка валидации' });
     } else {
       res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
@@ -44,7 +46,7 @@ const deleteCard = (async (req, res) => {
       res.status(200).send(cards);
     }
   } catch (err) {
-    if (err.name === 'CastError') {
+    if (err instanceof mongoose.Error.CastError) {
       res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id карточки' });
     } else if (err.message === 'not found') {
       res.status(NOT_FOUND_ERR).send({ message: 'Карточка не найдена' });
@@ -54,7 +56,7 @@ const deleteCard = (async (req, res) => {
   }
 });
 
-const likeCard = (async (req, res) => {
+const likeCardController = (async (req, res) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -67,7 +69,7 @@ const likeCard = (async (req, res) => {
       res.status(200).send(card);
     }
   } catch (err) {
-    if (err.name === 'CastError') {
+    if (err instanceof mongoose.Error.CastError) {
       res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id карточки' });
     } else if (err.message === 'not found') {
       res.status(NOT_FOUND_ERR).send({ message: 'Карточка не найдена' });
@@ -90,7 +92,7 @@ const deleteLikeCard = (async (req, res) => {
       res.status(200).send(card);
     }
   } catch (err) {
-    if (err.name === 'CastError') {
+    if (err instanceof mongoose.Error.CastError) {
       res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id карточки' });
     } else if (err.message === 'not found') {
       res.status(NOT_FOUND_ERR).send({ message: 'Карточка не найдена' });
@@ -104,6 +106,6 @@ module.exports = {
   getCards,
   deleteCard,
   createCard,
-  likeCard,
+  likeCardController,
   deleteLikeCard,
 };

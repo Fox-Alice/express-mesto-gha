@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const User = require('../models/User');
 
 const {
@@ -25,7 +27,7 @@ const getUserById = (async (req, res) => {
       res.status(200).send(user);
     }
   } catch (err) {
-    if (err.name === 'CastError') {
+    if (err instanceof mongoose.Error.CastError) {
       res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id' });
     } else if (err.message === 'not found') {
       res.status(NOT_FOUND_ERR).send({ message: 'Пользователь не найден' });
@@ -40,7 +42,7 @@ const createUser = (async (req, res) => {
     const newUser = await new User(req.body);
     res.status(201).send(await newUser.save());
   } catch (err) {
-    if (err.name === 'ValidationError') {
+    if (err instanceof mongoose.Error.ValidationError) {
       res.status(BAD_REQUEST_ERR).send({ message: 'Ошибка валидации' });
     } else {
       res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
