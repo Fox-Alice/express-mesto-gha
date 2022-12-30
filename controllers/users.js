@@ -6,12 +6,14 @@ const {
   BAD_REQUEST_ERR,
   NOT_FOUND_ERR,
   INTERNAL_SERVER_ERR,
+  OK,
+  CREATED,
 } = require('../constants');
 
 const getUsers = (async (req, res) => {
   try {
     const users = await User.find({});
-    res.status(200).send(users);
+    res.status(OK).send(users);
   } catch (err) {
     res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
   }
@@ -24,7 +26,7 @@ const getUserById = (async (req, res) => {
     if (!user) {
       throw new Error('not found');
     } else {
-      res.status(200).send(user);
+      res.status(OK).send(user);
     }
   } catch (err) {
     if (err instanceof mongoose.Error.CastError) {
@@ -40,7 +42,7 @@ const getUserById = (async (req, res) => {
 const createUser = (async (req, res) => {
   try {
     const newUser = await new User(req.body);
-    res.status(201).send(await newUser.save());
+    res.status(CREATED).send(await newUser.save());
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
       res.status(BAD_REQUEST_ERR).send({ message: 'Ошибка валидации' });
@@ -52,17 +54,16 @@ const createUser = (async (req, res) => {
 
 const updateProfile = (async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.owner._id, req.body, { new: true });
-    if (!req.body.name || !req.body.about) {
-      throw new Error('empty field');
-    } else if (!user) {
+    const user = await User
+      .findByIdAndUpdate(req.owner._id, req.body, { new: true, runValidators: true });
+    if (!user) {
       throw new Error('not found');
     } else {
-      res.status(200).send(user);
+      res.status(OK).send(user);
     }
   } catch (err) {
-    if (err.message === 'empty field') {
-      res.status(BAD_REQUEST_ERR).send({ message: 'Поле не должно быть пустым' });
+    if (err instanceof mongoose.Error.ValidationError) {
+      res.status(BAD_REQUEST_ERR).send({ message: err.message });
     } else if (err.message === 'not found') {
       res.status(NOT_FOUND_ERR).send({ message: 'Пользователь не найден' });
     } else {
@@ -73,17 +74,16 @@ const updateProfile = (async (req, res) => {
 
 const updateAvatar = (async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.owner._id, req.body, { new: true });
-    if (!req.body.avatar) {
-      throw new Error('empty field');
-    } else if (!user) {
+    const user = await User
+      .findByIdAndUpdate(req.owner._id, req.body, { new: true, runValidators: true });
+    if (!user) {
       throw new Error('not found');
     } else {
-      res.status(200).send(user);
+      res.status(OK).send(user);
     }
   } catch (err) {
-    if (err.message === 'empty field') {
-      res.status(BAD_REQUEST_ERR).send({ message: 'Поле не должно быть пустым' });
+    if (err instanceof mongoose.Error.ValidationError) {
+      res.status(BAD_REQUEST_ERR).send({ message: err.message });
     } else if (err.message === 'not found') {
       res.status(NOT_FOUND_ERR).send({ message: 'Пользователь не найден' });
     } else {

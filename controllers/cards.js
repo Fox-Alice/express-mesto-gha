@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const Card = require('../models/Card');
 
 const {
+  OK,
+  CREATED,
   BAD_REQUEST_ERR,
   NOT_FOUND_ERR,
   INTERNAL_SERVER_ERR,
@@ -10,8 +12,8 @@ const {
 
 const getCards = (async (req, res) => {
   try {
-    const cards = await Card.find({});
-    res.status(200).send(cards);
+    const cards = await Card.find({}).populate(['owner', 'likes']);
+    res.status(OK).send(cards);
   } catch (err) {
     res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
   }
@@ -20,12 +22,8 @@ const getCards = (async (req, res) => {
 const createCard = (async (req, res) => {
   try {
     const { name, link } = req.body;
-    const newCard = await new Card({ name, link, owner: req.owner._id });
-    Card.populate(newCard, {
-      path: 'user',
-      select: 'name about avatar',
-    });
-    res.status(201).send(await newCard.save());
+    const newCard = await Card.create({ name, link, owner: req.owner._id });
+    res.status(CREATED).send(await newCard.save());
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
       res.status(BAD_REQUEST_ERR).send({ message: 'Ошибка валидации' });
@@ -43,7 +41,7 @@ const deleteCard = (async (req, res) => {
       throw new Error('not found');
     } else {
       const cards = await Card.find({});
-      res.status(200).send(cards);
+      res.status(OK).send(cards);
     }
   } catch (err) {
     if (err instanceof mongoose.Error.CastError) {
@@ -56,17 +54,18 @@ const deleteCard = (async (req, res) => {
   }
 });
 
-const likeCardController = (async (req, res) => {
+const updateLike = (async (req, res, method) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
-      { $addToSet: { likes: req.owner._id } },
+      { [method]: { likes: req.owner._id } },
       { new: true },
     );
     if (!card) {
       throw new Error('not found');
     } else {
-      res.status(200).send(card);
+      res.status(OK).send(card);
+      return;
     }
   } catch (err) {
     if (err instanceof mongoose.Error.CastError) {
@@ -79,33 +78,14 @@ const likeCardController = (async (req, res) => {
   }
 });
 
-const deleteLikeCard = (async (req, res) => {
-  try {
-    const card = await Card.findByIdAndUpdate(
-      req.params.cardId,
-      { $pull: { likes: req.owner._id } },
-      { new: true },
-    );
-    if (!card) {
-      throw new Error('not found');
-    } else {
-      res.status(200).send(card);
-    }
-  } catch (err) {
-    if (err instanceof mongoose.Error.CastError) {
-      res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id карточки' });
-    } else if (err.message === 'not found') {
-      res.status(NOT_FOUND_ERR).send({ message: 'Карточка не найдена' });
-    } else {
-      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
-    }
-  }
-});
+const likeCard = async (req, res) => updateLike(req, res, '$addToSet');
+
+const deleteLikeCard = (req, res) => updateLike(req, res, '$pull');
 
 module.exports = {
   getCards,
   deleteCard,
   createCard,
-  likeCardController,
+  likeCard,
   deleteLikeCard,
 };
