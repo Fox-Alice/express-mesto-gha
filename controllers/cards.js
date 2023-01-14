@@ -5,82 +5,77 @@ const Card = require('../models/Card');
 const {
   OK,
   CREATED,
-  BAD_REQUEST_ERR,
-  NOT_FOUND_ERR,
-  INTERNAL_SERVER_ERR,
 } = require('../constants');
+const {
+  BadRequestError,
+  NotFoundError,
+  ForbiddenError,
+} = require('../errors');
 
-const getCards = (async (req, res) => {
+const getCards = (async (req, res, next) => {
   try {
     const cards = await Card.find({}).populate(['owner', 'likes']);
     res.status(OK).send(cards);
   } catch (err) {
-    res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
+    next(err);
   }
 });
 
-const createCard = (async (req, res) => {
+const createCard = (async (req, res, next) => {
   try {
     const { name, link } = req.body;
-    const newCard = await Card.create({ name, link, owner: req.owner._id });
+    const newCard = await Card.create({ name, link, owner: req.user._id });
     res.status(CREATED).send(await newCard.save());
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      res.status(BAD_REQUEST_ERR).send({ message: 'Ошибка валидации' });
-    } else {
-      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
-    }
+      next(new BadRequestError(`${err.message}`));
+    } else { next(err); }
   }
 });
 
-const deleteCard = (async (req, res) => {
+const deleteCard = (async (req, res, next) => {
   try {
+    if (req.owner !== req.user._id) {
+      next(new ForbiddenError('Чужие карточки удалять нельзя!'));
+    }
     const { cardId } = req.params;
     const card = await Card.findByIdAndRemove(cardId);
     if (!card) {
-      throw new Error('not found');
+      next(new NotFoundError('Карточка не найдена'));
     } else {
       const cards = await Card.find({});
       res.status(OK).send(cards);
     }
   } catch (err) {
     if (err instanceof mongoose.Error.CastError) {
-      res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id карточки' });
-    } else if (err.message === 'not found') {
-      res.status(NOT_FOUND_ERR).send({ message: 'Карточка не найдена' });
-    } else {
-      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
-    }
+      next(new BadRequestError('Невалидный id карточки'));
+    } else { next(err); }
   }
 });
 
-const updateLike = (async (req, res, method) => {
+const updateLike = (async (req, res, next, method) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
-      { [method]: { likes: req.owner._id } },
+      { [method]: { likes: req.user._id } },
       { new: true },
     );
     if (!card) {
-      throw new Error('not found');
+      next(new NotFoundError('Карточка не найдена'));
     } else {
       res.status(OK).send(card);
       return;
     }
   } catch (err) {
     if (err instanceof mongoose.Error.CastError) {
-      res.status(BAD_REQUEST_ERR).send({ message: 'Невалидный id карточки' });
-    } else if (err.message === 'not found') {
-      res.status(NOT_FOUND_ERR).send({ message: 'Карточка не найдена' });
-    } else {
-      res.status(INTERNAL_SERVER_ERR).send({ message: 'Ошибка сервера' });
-    }
+      next(new BadRequestError('Невалидный id карточки'));
+    } else { next(err); }
   }
 });
 
-const likeCard = async (req, res) => updateLike(req, res, '$addToSet');
+const likeCard = async (req, res, next) => updateLike(req, res, next, '$addToSet');
 
-const deleteLikeCard = (req, res) => updateLike(req, res, '$pull');
+const deleteLikeCard = (req, res, next) => updateLike(req, res, next, '$pull');
 
 module.exports = {
   getCards,

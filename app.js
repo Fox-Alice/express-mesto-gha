@@ -2,25 +2,31 @@ const express = require('express');
 
 const mongoose = require('mongoose');
 
+const dotenv = require('dotenv');
+
+const { errors } = require('celebrate');
+
 const router = require('./routes/index');
+const errorHandler = require('./middlewares/errors-handler');
 
 mongoose.set('strictQuery', true);
 
-const { PORT = 3000 } = process.env;
+dotenv.config();
+
+const { PORT, MONGO_URL } = process.env;
 
 const app = express();
 
-app.use((req, res, next) => {
-  req.owner = {
-    _id: '63a9119cfc3e70eaf7560a9e',
-  };
-  next();
-});
+app.use(express.json());
 
 app.use('/', router);
 
+app.use(errors());
+
+app.use(errorHandler);
+
 async function connectDB() {
-  await mongoose.connect('mongodb://localhost:27017/mestodb', {
+  await mongoose.connect(MONGO_URL, {
     useNewUrlParser: true,
   });
   app.listen(PORT);
