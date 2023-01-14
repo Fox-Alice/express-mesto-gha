@@ -4,23 +4,21 @@ const { UnauthorizedError, ForbiddenError } = require('../errors');
 const { JWT_SECRET_KEY, NODE_ENV } = process.env;
 
 const auth = (req, res, next) => {
-  const token = req.headers.authorization;
-// console.log(req.headers.authorization);
-  if (!token) {
-    next(new UnauthorizedError('Необходима авторизация'));
-  }
-
+  const { authorization } = req.headers;
   let payload;
   try {
-    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET_KEY : 'dev_secret');
-    console.log(payload);
+    if (!authorization || !authorization.startsWith('Bearer ')) {
+      next(new UnauthorizedError('Необходима авторизация'));
+    } else {
+      const token = authorization.replace('Bearer ', '');
+      payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET_KEY : 'dev_secret');
+    }
   } catch (err) {
     if (err.name === 'JsonWebTokenError') {
-      console.log(err.message);
       next(new ForbiddenError('Нет доступа'));
     } else {
-    next(err);
-  }
+      next(err);
+    }
   }
   req.user = payload;
   next();
