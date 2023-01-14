@@ -37,10 +37,10 @@ const deleteCard = (async (req, res, next) => {
   try {
     const { cardId } = req.params;
     const card = await Card.findByIdAndRemove(cardId);
-    if (!card.owner.equals(req.user._id)) {
-      next(new ForbiddenError('Чужие карточки удалять нельзя!'));
-    } else if (!card) {
+    if (!card) {
       next(new NotFoundError('Карточка не найдена'));
+    } else if (!card.owner.equals(req.user._id)) {
+      next(new ForbiddenError('Чужие карточки удалять нельзя!'));
     } else {
       const cards = await Card.find({});
       res.status(OK).send(cards);
