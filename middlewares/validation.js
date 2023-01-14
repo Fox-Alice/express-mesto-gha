@@ -21,6 +21,28 @@ const validateRegisterBody = celebrate({
         'string.max': 'Максимальная длина пароля 30 символов',
         'any.required': 'Обязательное поле',
       }),
+    avatar: Joi.string().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message(
+        'Некорректная ссылка на аватар',
+      );
+    }),
+  })
+    .unknown(),
+});
+
+const validateUpdateProfile = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).messages({
+      'string.min': 'Минимальная длина поля 2 символа',
+      'string.max': 'Максимальная длина поля 30 символов',
+    }),
+    about: Joi.string().min(2).max(30).messages({
+      'string.min': 'Минимальная длина поля 2 символа',
+      'string.max': 'Максимальная длина поля 30 символов',
+    }),
   })
     .unknown(),
 });
@@ -35,7 +57,8 @@ const validateUpdateAvatar = celebrate({
         'Некорректная ссылка на аватар',
       );
     }),
-  }),
+  })
+    .unknown(),
 });
 
 const validateCardInfo = celebrate({
@@ -49,11 +72,13 @@ const validateCardInfo = celebrate({
         'Некорректная ссылка на изображение',
       );
     }),
-  }),
+  })
+    .unknown(),
 });
 
 module.exports = {
   validateCardInfo,
   validateRegisterBody,
   validateUpdateAvatar,
+  validateUpdateProfile,
 };

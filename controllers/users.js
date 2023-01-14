@@ -61,7 +61,9 @@ const getUserById = (async (req, res, next) => {
 
 const createUser = (async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const {
+      email, password, name, about, avatar,
+    } = req.body;
     if (!email || !password) {
       throw new BadRequestError('Не передан email или password');
     }
@@ -70,9 +72,17 @@ const createUser = (async (req, res, next) => {
     if (user) {
       throw new ConflictError('Пользователь уже существует');
     }
-    const newUser = await new User({ email, password: hash });
+    const newUser = await new User({
+      email, password: hash, name, about, avatar,
+    });
     await newUser.save();
-    res.status(CREATED).send({ email: newUser.email, _id: newUser._id });
+    res.status(CREATED).send({
+      email: newUser.email,
+      password: newUser.password,
+      name: newUser.name,
+      about: newUser.about,
+      avatar: newUser.avatar,
+    });
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
       next(new BadRequestError('Ошибка валидации'));
