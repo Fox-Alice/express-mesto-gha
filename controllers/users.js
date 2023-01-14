@@ -75,6 +75,9 @@ const createUser = (async (req, res, next) => {
     const newUser = await new User({
       email, password: hash, name, about, avatar,
     });
+    const newUser = await new User({
+      email, password: hash, name, about, avatar,
+    });
     await newUser.save();
     res.status(CREATED).send({
       email: newUser.email,
