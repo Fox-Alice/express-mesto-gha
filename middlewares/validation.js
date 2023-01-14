@@ -1,5 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
+const { ObjectId } = require('mongoose').Types;
 
 const validateRegisterBody = celebrate({
   body: Joi.object().keys({
@@ -72,7 +73,7 @@ const validateUpdateAvatar = celebrate({
 const validateCardInfo = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().custom((value, helpers) => {
+    link: Joi.string().required().custom((value, helpers) => {
       if (validator.isURL(value)) {
         return value;
       }
@@ -84,9 +85,35 @@ const validateCardInfo = celebrate({
     .unknown(),
 });
 
+const validateObjectId = celebrate({
+  params: Joi.object().keys({
+    id: Joi.string().required().custom((value, helpers) => {
+      if (ObjectId.isValid(value)) {
+        return value;
+      }
+      return helpers.message('Невалидный idшник');
+    }),
+  })
+    .unknown(),
+});
+
+const validateObjectCardId = celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().required().custom((value, helpers) => {
+      if (ObjectId.isValid(value)) {
+        return value;
+      }
+      return helpers.message('Невалидный idшник');
+    }),
+  })
+    .unknown(),
+});
+
 module.exports = {
   validateCardInfo,
   validateRegisterBody,
   validateUpdateAvatar,
   validateUpdateProfile,
+  validateObjectId,
+  validateObjectCardId,
 };

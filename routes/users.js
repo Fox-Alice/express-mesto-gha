@@ -7,14 +7,14 @@ const {
   updateAvatar,
 } = require('../controllers/users');
 
-const { validateUpdateAvatar } = require('../middlewares/validation');
+const { validateUpdateAvatar, validateObjectId, validateUpdateProfile } = require('../middlewares/validation');
 
 const userRouter = express.Router();
 
 userRouter.get('/me', getUser);
 userRouter.get('/', getUsers);
-userRouter.get('/:id', getUserById);
-userRouter.patch('/me', updateProfile);
+userRouter.get('/:id', validateObjectId, getUserById);
+userRouter.patch('/me', validateUpdateProfile, updateProfile);
 userRouter.patch('/me/avatar', validateUpdateAvatar, updateAvatar);
 
 module.exports = userRouter;
