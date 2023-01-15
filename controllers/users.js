@@ -64,14 +64,7 @@ const createUser = (async (req, res, next) => {
     const {
       email, password, name, about, avatar,
     } = req.body;
-    if (!email || !password) {
-      throw new BadRequestError('Не передан email или password');
-    }
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
-    const user = await User.findOne({ email });
-    if (user) {
-      throw new ConflictError('Пользователь уже существует');
-    }
     const newUser = await new User({
       email, password: hash, name, about, avatar,
     });
@@ -83,6 +76,9 @@ const createUser = (async (req, res, next) => {
       avatar: newUser.avatar,
     });
   } catch (err) {
+    if (err.code === 11000) {
+      next(new ConflictError('Пользователь уже существует'));
+    }
     if (err instanceof mongoose.Error.ValidationError) {
       next(new BadRequestError('Ошибка валидации'));
     } else { next(err); }
@@ -133,17 +129,14 @@ const updateAvatar = (async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      next(new BadRequestError('Неправильный логин или пароль'));
-    }
     const user = await User.findOne({ email }).select('+ password');
     if (!user) {
-      next(new UnauthorizedError('Неправильный логин или пароль'));
+      throw new UnauthorizedError('Неправильный логин или пароль');
     }
     const matched = await bcrypt.compare(password, user.password);
 
     if (!matched) {
-      next(new UnauthorizedError('Неправильный логин или пароль'));
+      throw new UnauthorizedError('Неправильный логин или пароль');
     }
     const token = generateToken({ _id: user._id });
     res.status(OK).send({ message: 'Welcome!', token });

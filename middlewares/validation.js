@@ -14,22 +14,22 @@ const validateRegisterBody = celebrate({
       }),
     password: Joi
       .string()
-      .min(2)
-      .max(30)
       .required()
       .messages({
         'string.min': 'Минимальная длина пароля 2 символа',
         'string.max': 'Максимальная длина пароля 30 символов',
         'any.required': 'Обязательное поле',
       }),
-    name: Joi.string().min(2).max(30).messages({
-      'string.min': 'Минимальная длина поля 2 символа',
-      'string.max': 'Максимальная длина поля 30 символов',
-    }),
-    about: Joi.string().min(2).max(30).messages({
-      'string.min': 'Минимальная длина поля 2 символа',
-      'string.max': 'Максимальная длина поля 30 символов',
-    }),
+    name: Joi.string().min(2).max(30)
+      .messages({
+        'string.min': 'Минимальная длина поля 2 символа',
+        'string.max': 'Максимальная длина поля 30 символов',
+      }),
+    about: Joi.string().min(2).max(30)
+      .messages({
+        'string.min': 'Минимальная длина поля 2 символа',
+        'string.max': 'Максимальная длина поля 30 символов',
+      }),
     avatar: Joi.string().custom((value, helpers) => {
       if (validator.isURL(value)) {
         return value;
@@ -38,27 +38,48 @@ const validateRegisterBody = celebrate({
         'Некорректная ссылка на аватар',
       );
     }),
-  })
-    .unknown(),
+  }),
+});
+
+const validateLoginBody = celebrate({
+  body: Joi.object().keys({
+    email: Joi
+      .string()
+      .required()
+      .email()
+      .messages({
+        'string.email': 'Некорректная почта',
+        'any.required': 'Обязательное поле',
+      }),
+    password: Joi
+      .string()
+      .required()
+      .messages({
+        'string.min': 'Минимальная длина пароля 2 символа',
+        'string.max': 'Максимальная длина пароля 30 символов',
+        'any.required': 'Обязательное поле',
+      }),
+  }),
 });
 
 const validateUpdateProfile = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).messages({
-      'string.min': 'Минимальная длина поля 2 символа',
-      'string.max': 'Максимальная длина поля 30 символов',
-    }),
-    about: Joi.string().min(2).max(30).messages({
-      'string.min': 'Минимальная длина поля 2 символа',
-      'string.max': 'Максимальная длина поля 30 символов',
-    }),
-  })
-    .unknown(),
+    name: Joi.string().required().min(2).max(30)
+      .messages({
+        'string.min': 'Минимальная длина поля 2 символа',
+        'string.max': 'Максимальная длина поля 30 символов',
+      }),
+    about: Joi.string().required().min(2).max(30)
+      .messages({
+        'string.min': 'Минимальная длина поля 2 символа',
+        'string.max': 'Максимальная длина поля 30 символов',
+      }),
+  }),
 });
 
 const validateUpdateAvatar = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().custom((value, helpers) => {
+    avatar: Joi.string().required().custom((value, helpers) => {
       if (validator.isURL(value)) {
         return value;
       }
@@ -66,8 +87,7 @@ const validateUpdateAvatar = celebrate({
         'Некорректная ссылка на аватар',
       );
     }),
-  })
-    .unknown(),
+  }),
 });
 
 const validateCardInfo = celebrate({
@@ -81,8 +101,7 @@ const validateCardInfo = celebrate({
         'Некорректная ссылка на изображение',
       );
     }),
-  })
-    .unknown(),
+  }),
 });
 
 const validateObjectId = celebrate({
@@ -93,27 +112,14 @@ const validateObjectId = celebrate({
       }
       return helpers.message('Невалидный idшник');
     }),
-  })
-    .unknown(),
-});
-
-const validateObjectCardId = celebrate({
-  params: Joi.object().keys({
-    cardId: Joi.string().required().custom((value, helpers) => {
-      if (ObjectId.isValid(value)) {
-        return value;
-      }
-      return helpers.message('Невалидный idшник');
-    }),
-  })
-    .unknown(),
+  }),
 });
 
 module.exports = {
   validateCardInfo,
   validateRegisterBody,
+  validateLoginBody,
   validateUpdateAvatar,
   validateUpdateProfile,
   validateObjectId,
-  validateObjectCardId,
 };

@@ -28,20 +28,21 @@ const createCard = (async (req, res, next) => {
     res.status(CREATED).send(await newCard.save());
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      next(new BadRequestError(`${err.message}`));
+      next(new BadRequestError(err.message));
     } else { next(err); }
   }
 });
 
 const deleteCard = (async (req, res, next) => {
   try {
-    const { cardId } = req.params;
-    const card = await Card.findByIdAndRemove(cardId);
+    const { id } = req.params;
+    const card = await Card.findById(id);
     if (!card) {
       next(new NotFoundError('Карточка не найдена'));
     } else if (!card.owner.equals(req.user._id)) {
       next(new ForbiddenError('Чужие карточки удалять нельзя!'));
     } else {
+      card.remove();
       const cards = await Card.find({});
       res.status(OK).send(cards);
     }
@@ -72,7 +73,7 @@ const updateLike = (async (req, res, next, method) => {
   }
 });
 
-const likeCard = async (req, res, next) => updateLike(req, res, next, '$addToSet');
+const likeCard = (req, res, next) => updateLike(req, res, next, '$addToSet');
 
 const deleteLikeCard = (req, res, next) => updateLike(req, res, next, '$pull');
 

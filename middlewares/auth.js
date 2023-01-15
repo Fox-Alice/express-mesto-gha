@@ -15,9 +15,9 @@ const auth = (req, res, next) => {
     }
   } catch (err) {
     if (err.name === 'JsonWebTokenError') {
-      next(new ForbiddenError('Нет доступа'));
+      throw new ForbiddenError('Нет доступа');
     } else {
-      next(err);
+      throw new Error('Ошибка сервера');
     }
   }
   req.user = payload;
