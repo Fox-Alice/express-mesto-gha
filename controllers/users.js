@@ -68,6 +68,8 @@ const createUser = (async (req, res, next) => {
     const newUser = await new User({
       email, password: hash, name, about, avatar,
     });
+    console.log(newUser);
+
     await newUser.save();
     res.status(CREATED).send({
       email: newUser.email,
@@ -80,6 +82,7 @@ const createUser = (async (req, res, next) => {
       next(new ConflictError('Пользователь уже существует'));
     }
     if (err instanceof mongoose.Error.ValidationError) {
+      console.log(err.message);
       next(new BadRequestError('Ошибка валидации'));
     } else { next(err); }
   }
