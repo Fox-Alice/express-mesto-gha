@@ -8,10 +8,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     validate: {
-      validator(email) {
-        return validator.isEmail(email);
+      validator(value) {
+        return validator.isEmail(value);
       },
-      message: 'Введен неверный формат электронной почты',
+      message: 'Необходимо ввести корректный адрес электронной почты',
     },
   },
   password: {
@@ -33,8 +33,8 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     validate: {
-      validator(val) {
-        return validator.isURL(val);
+      validator(value) {
+        return validator.isURL(value);
       },
       message: 'Необходимо ввести корректную ссылку на изображение',
     },

@@ -56,11 +56,12 @@ const deleteCard = (async (req, res, next) => {
 const updateLike = (async (req, res, next, method) => {
   try {
     const card = await Card.findByIdAndUpdate(
-      req.params.cardId,
+      req.params.id,
       { [method]: { likes: req.user._id } },
       { new: true },
     );
     if (!card) {
+      console.log(card);
       next(new NotFoundError('Карточка не найдена'));
     } else {
       res.status(OK).send(card);
