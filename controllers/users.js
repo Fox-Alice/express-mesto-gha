@@ -68,7 +68,6 @@ const createUser = (async (req, res, next) => {
     const newUser = await new User({
       email, password: hash, name, about, avatar,
     });
-    console.log(newUser);
 
     await newUser.save();
     res.status(CREATED).send({
@@ -80,9 +79,7 @@ const createUser = (async (req, res, next) => {
   } catch (err) {
     if (err.code === 11000) {
       next(new ConflictError('Пользователь уже существует'));
-    }
-    if (err instanceof mongoose.Error.ValidationError) {
-      console.log(err.message);
+    } else if (err instanceof mongoose.Error.ValidationError) {
       next(new BadRequestError('Ошибка валидации'));
     } else { next(err); }
   }

@@ -16,8 +16,6 @@ const validateRegisterBody = celebrate({
       .string()
       .required()
       .messages({
-        'string.min': 'Минимальная длина пароля 2 символа',
-        'string.max': 'Максимальная длина пароля 30 символов',
         'any.required': 'Обязательное поле',
       }),
     name: Joi.string().min(2).max(30)

@@ -42,7 +42,7 @@ const deleteCard = (async (req, res, next) => {
     } else if (!card.owner.equals(req.user._id)) {
       next(new ForbiddenError('Чужие карточки удалять нельзя!'));
     } else {
-      card.remove();
+      await card.remove();
       const cards = await Card.find({});
       res.status(OK).send(cards);
     }
@@ -61,7 +61,6 @@ const updateLike = (async (req, res, next, method) => {
       { new: true },
     );
     if (!card) {
-      console.log(card);
       next(new NotFoundError('Карточка не найдена'));
     } else {
       res.status(OK).send(card);
